@@ -5,6 +5,7 @@ set -ex
 # shellcheck disable=SC2068
 version() { IFS="."; printf "%03d%03d%03d\\n" $@; unset IFS;}
 
+#Check the supported go version 
 minimum_go_version=1.12
 current_go_version=$(go version | cut -d " " -f 3)
 
@@ -15,7 +16,11 @@ fi
 
 LAUNCH_PATH="${PWD}"
 cd "$(dirname "$0")/.."
+#look at the previous directory
 
+
+#make sure we are building from the gopath directory
+#note the harcoded github.com
 PACKAGE_PATH="$(go list -e -f '{{.Dir}}' github.com/openshift/installer)"
 if test -z "${PACKAGE_PATH}"
 then
@@ -30,7 +35,11 @@ then
 	exit 1
 fi
 
+
+
 MODE="${MODE:-release}"
+
+# get the commit number
 GIT_COMMIT="${SOURCE_GIT_COMMIT:-$(git rev-parse --verify 'HEAD^{commit}')}"
 GIT_TAG="${BUILD_VERSION:-$(git describe --always --abbrev=40 --dirty)}"
 LDFLAGS="${LDFLAGS} -X github.com/openshift/installer/pkg/version.Raw=${GIT_TAG} -X github.com/openshift/installer/pkg/version.Commit=${GIT_COMMIT}"
